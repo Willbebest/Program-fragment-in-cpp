@@ -1,62 +1,54 @@
 #include <iostream>
+#include <vector>
 #include <stack>
 
-using std::stack;
+using namespace std;
 
-int pattern(int arr[], int start, int end){
-    if(start>end||arr==NULL||start<0||end<=0)
-        return -1;
-    int i=start, j=end, x=arr[start];
-    while(i<j){
-        while(i<j && arr[j]>=x)
-            j--;
-        if(i<j)
-            arr[i]=arr[j];
-        while(i<j && arr[i]<=x)
-            i++;
-        if(i<j)
-            arr[j]=arr[i];
+int Pattern(vector<int>& nums, int start, int back) {
+    int val = nums[start];
+    while (start < back) {
+        while (start < back && nums[back] >= val) back--;
+        if (start < back) nums[start] = nums[back];
+        while (start < back && nums[start] <= val) start++;
+        if (start < back) nums[back] = nums[start];
     }
-    arr[i]=x;
-    return i;
-
+    nums[start] = val;
+    return start;
 }
-
-void quick_sort(int arr[], int start, int end){
-    
-    if(start>end||arr==NULL||start<0||end<=0)
+// 递归版本
+void QuickSort(vector<int>& nums, int start, int back) {
+    if (nums.empty() || start > back || start < 0 || back >= nums.size()) {
         return;
-    int mid=pattern(arr, start, end);
-    if(mid>start)
-        quick_sort(arr, start, mid-1);
-    if(mid<end)
-        quick_sort(arr, mid+1, end);
+    }
+    int mid = Pattern(nums, start, back);
+    if (mid > start) QuickSort(nums, start, mid-1);
+    if (mid < back)  QuickSort(nums, mid+1, back);
 }
-
-//非递归快速排序
-void QuickSort(int arr[], int start, int end){
-    if(arr==NULL||start<0||end<=0||start>=end)
-        return;
-    stack<int> temp;
-    int left,right;
-    temp.push(end);
-    temp.push(start);
-    while(!temp.empty()){
-        left=temp.top();
-        temp.pop();
-        right=temp.top();
-        temp.pop();
-        if(left<right){
-            int mid=pattern(arr, left, right);
-            if(mid>left){
-                temp.push(mid-1);
-                temp.push(left);
-            }
-            if(mid<right){
-                temp.push(right);
-                temp.push(mid+1);
-            }
-        }
+// 非递归版本
+void QuickSort(vector<int>& nums) {
+    if (nums.size() <= 1) return;
+    int left = 0;
+    int right = nums.size() - 1;
+    stack<pair<int, int>> stk;
+    stk.push({left, right});
+    while (stk.size()) {
+        int start = stk.top().first;
+        int back = stk.top().second;
+        stk.pop();
+        int mid = Pattern(nums, start, back);
+        if (mid > start) stk.push({start, mid-1});
+        if (mid < back) stk.push({mid+1, back});
     }
 }
 
+int main()
+{
+    vector<int> nums{ 8,4,3,2,7,5,0,3,4,3,2 };
+    // QuickSort(nums, 0, nums.size()-1);
+    QuickSort(nums);
+    for (auto elem : nums) {
+        cout << elem << " ";
+    }
+    cout << endl;
+    return 0;
+}
